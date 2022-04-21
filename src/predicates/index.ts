@@ -22,6 +22,9 @@ export const isNil = (a: any) => a == null;
 // isLessThan :: Number -> Number -> Boolean
 export const isLessThan = (x: number) => (y: number) => y < x;
 
+// isLessThan :: Number -> Number -> Boolean
+export const isLessThanEquals = (x: number) => (y: number) => y <= x;
+
 // isGreaterThan :: Number -> Number -> Boolean
 export const isGreaterThan = (x: number) => (y: number) => y > x;
 

@@ -1,8 +1,7 @@
-import { PredOrFn, predOrFn } from "../../predicates";
-
-export const or =
-    <A>(f: PredOrFn<A>, g: PredOrFn<A>) =>
+// or :: (a -> Boolean) | Pred -> (a -> Boolean) | Pred -> a -> Boolean
+const or =
+    <A>(fn1: (x: A) => boolean, fn2: (x: A) => boolean) =>
     (x: A) =>
-        predOrFn(f, x) || predOrFn(g, x);
+        fn1(x) || fn2(x);
 
 export default or;

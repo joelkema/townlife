@@ -5,7 +5,9 @@ export type AppState = {
 // 80 saturatie per dag =
 
 export type Citizen = {
+    id: string;
     name: string;
+    state: CitizenState;
     // health: number;
     // age: number;
     // gender: "male" | "female";
@@ -14,6 +16,8 @@ export type Citizen = {
     // happiness
     basicNeeds: BasicNeeds;
 };
+
+type CitizenState = "awake" | "asleep";
 
 type Profession = "foresting" | "mining" | "laboror";
 // Gatherer;

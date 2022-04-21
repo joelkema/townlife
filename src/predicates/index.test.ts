@@ -1,7 +1,9 @@
-import { isLessThan, isPositive, isNegative } from "./predicates";
+import { isLessThan, isPositive, isNegative } from ".";
 
-test("three isLessThan four", () => expect(isLessThan(4)(3)).toBe(true));
-test("nine isLessThan ten", () => expect(isLessThan(10)(9)).toBe(true));
+const isLessThanFour = isLessThan(4);
+
+test("three isLessThan four", () => expect(isLessThanFour(3)).toBe(true));
+test("nine isLessThan four results in false", () => expect(isLessThanFour(9)).toBe(false));
 
 test("one is a positive number", () => expect(isPositive(1)).toBe(true));
 test("minus one is not a positive number", () => expect(isPositive(-1)).toBe(false));
