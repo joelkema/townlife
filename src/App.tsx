@@ -1,32 +1,16 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import "./App.css";
 import useInterval from "./hooks/useInterval";
 import { AppState, Citizen } from "./types";
-import { decreaseSaturation, isHungry, isSleeping, isTired } from "./citizen/basicNeeds";
 
-import { getDay, getHours, getMinutes, calculateTime } from "./utils/date";
-import { or, when } from "./logic";
-import compose from "./logic/compose";
-import { isGreaterThan, isLessThan } from "./predicates";
+import { and, not, when } from "./logic";
 import { pipe } from "./logic/pipe";
+import { ticksPerMinute, getTime, formatTime, ticksPerMilliseconds } from "./utils/time";
+import { decreaseRest, isSleeping } from "./citizen/basicNeeds/rest";
+import { isHungry, decreaseSaturation } from "./citizen/basicNeeds";
 
-const oneHourTicks = 2500; // ticks
-const tickPerSecond = 60;
-
-const oneTick = (1 / 60) * 1000; // one tick is 1/60 of a realtime second
-const ticksPerDay = 20000; // (5 1/2 min per day)
-
-const oneHour = 1000; // 1 second
-const quarterHour = oneHour / 4;
-
-// 0 = 00:00
-// 1 = 00:15
-// 5 = 01:15
-
-const wakeup = (citizen: Citizen): Citizen => ({
-    ...citizen,
-    state: "awake",
-});
+const oneSecond = 1000; // 1 second = 1000ms
+const interval = oneSecond / 4; // 250ms
 
 const eat = (citizen: Citizen): Citizen => ({
     ...citizen,
@@ -36,6 +20,11 @@ const eat = (citizen: Citizen): Citizen => ({
 const sleep = (citizen: Citizen): Citizen => ({
     ...citizen,
     state: "asleep",
+});
+
+const wakeUp = (citizen: Citizen): Citizen => ({
+    ...citizen,
+    state: "awake",
 });
 
 const increaseRest = (citizen: Citizen): Citizen => ({
@@ -59,35 +48,42 @@ const log = (prop?: keyof Citizen) => (citizen: Citizen) => {
 
 // const act = (hour: number, minutes: number) => {};
 
-const isSleepTime = or(isLessThan(8), isGreaterThan(20));
+const isSleepTime = (hour: number) => (_: Citizen) => hour < 8 || hour > 20;
 
-const tick =
-    (prev: Date, current: Date) =>
+const automate =
+    (prev: number, current: number) =>
     (state: AppState): AppState => {
-        const day = getDay(current);
-        const hour = getHours(current);
-        const minute = getMinutes(current);
+        const prevTicks = ticksPerMilliseconds(prev * interval, 11);
+        const currentTicks = ticksPerMilliseconds(current * interval, 11);
+
+        console.log("==================");
+        console.log(prev);
+        console.log(current);
+        console.log(prevTicks);
+        console.log(currentTicks);
+        console.log(currentTicks - prevTicks);
+
+        const { minutes, hours, days } = getTime(currentTicks);
 
         const citizens = Object.keys(state.citizens).reduce((map: Record<string, Citizen>, id) => {
             const c = state.citizens[id];
 
-            console.log(` == TIME == `);
-            console.log(`${day}  ${hour}:${minute}`);
-
             //const sleeptime = (citizen: Citizen) => (hour: number) => {};
 
-            const a = when(isSleepTime, (_) => sleep(c))(hour);
-            if (isSleepTime(hour)) {
-                console.log("sleeptime");
-            }
+            // const a = when(isSleepTime, (_) => sleep(c))(hour);
+            // if (isSleepTime(hour)) {
+            //     console.log("sleeptime");
+            // }
 
             // const citizen = state.citizens[id];
             const citizen = pipe(
                 c,
-                log("state"),
+                // log("state"),
                 when(isSleeping, increaseRest),
+                when(not(isSleeping), decreaseRest(currentTicks, prevTicks)),
+                when(and(not(isSleepTime(hours)), isSleeping), wakeUp),
                 when(isHungry, eat),
-                when(isTired, sleep),
+                // when(or(isTired, isSleepTime, sleep),
                 decreaseSaturation,
             );
 
@@ -96,13 +92,13 @@ const tick =
             return map;
         }, {});
 
-        return { ...state, citizens };
+        return { ...state, days, hours, minutes, citizens };
     };
 
 const aad: Citizen = {
     id: "1",
     name: "Aad",
-    state: "asleep",
+    state: "awake",
     basicNeeds: {
         food: 100,
         rest: 100,
@@ -114,33 +110,58 @@ const useTownLife = () => {
         citizens: {
             [aad.id]: aad,
         },
+        days: 0,
+        hours: 0,
+        minutes: 0,
     });
 
-    // quarter hour
-    const quarterHourRef = useRef<number>(0);
+    const prevTicks = useRef<number>(0);
+    const currentTicks = useRef<number>(0);
 
     useInterval(() => {
-        const updatedState = tick(
-            calculateTime(quarterHourRef.current),
-            calculateTime(quarterHourRef.current++),
-        )(data);
+        currentTicks.current++;
+
+        const updatedState = automate(prevTicks.current, currentTicks.current)(data);
+
+        prevTicks.current = currentTicks.current;
 
         setData(updatedState);
-    }, quarterHour); // Simulation runs every 250ms,
+    }, interval); // Simulation runs every 250ms,
 
     // useInterval(() => {
     //     console.log("A");
     // }, oneTick);
 
-    return [data];
+    return { data, ticks: prevTicks.current };
 };
 
 const App = () => {
-    const [data] = useTownLife();
+    const { data, ticks } = useTownLife();
 
     // console.log(data.citizens["1"].basicNeeds.food);
 
-    return <>{}</>;
+    return (
+        <>
+            <p>day: {data.days}</p>
+            <p>time: {formatTime(data.hours, data.minutes)}</p>
+            <p>ticks: {ticks}</p>
+
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>State</th>
+                    <th>Food</th>
+                    <th>Rest</th>
+                </tr>
+                <tr>
+                    <td>{data.citizens[aad.id].name}</td>
+                    <td>{data.citizens[aad.id].state}</td>
+                    <td>{data.citizens[aad.id].basicNeeds.food}</td>
+                    <td>{data.citizens[aad.id].basicNeeds.rest}</td>
+                </tr>
+            </table>
+        </>
+    );
 };
 
 export default App;

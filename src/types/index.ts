@@ -1,5 +1,8 @@
 export type AppState = {
     citizens: Record<string, Citizen>;
+    days: number;
+    hours: number;
+    minutes: number;
 };
 
 // 80 saturatie per dag =

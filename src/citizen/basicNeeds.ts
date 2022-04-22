@@ -1,5 +1,11 @@
 import { and } from "../logic";
-import { isGreaterThan, isGreaterThanEquals, isLessThan, isLessThanEquals } from "../predicates";
+import {
+    isGreaterThan,
+    isGreaterThanEquals,
+    isLessThan,
+    isLessThanEquals,
+    isNumber,
+} from "../predicates";
 import { Citizen } from "../types";
 
 // FOOD
@@ -15,14 +21,3 @@ export const decreaseSaturation = (citizen: Citizen): Citizen => ({
     ...citizen,
     basicNeeds: { ...citizen.basicNeeds, food: calculateSaturation(citizen.basicNeeds.food) },
 });
-
-// RESTED
-const checkIfRested = (pred: (n: number) => boolean) => (citizen: Citizen) =>
-    pred(citizen.basicNeeds.rest);
-export const isRested = checkIfRested(isGreaterThan(28));
-export const isTired = checkIfRested(and(isGreaterThanEquals(14), isLessThanEquals(28)));
-export const isVeryTired = checkIfRested(and(isGreaterThanEquals(1), isLessThan(14)));
-export const isExhausted = checkIfRested(isLessThan(1));
-
-export const isAwake = ({ state }: Citizen) => state === "awake";
-export const isSleeping = ({ state }: Citizen) => state === "asleep";
