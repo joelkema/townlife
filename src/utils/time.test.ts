@@ -3,6 +3,11 @@ import { getTime, ticksPerDay, ticksPerMinute } from "./time";
 test("42 ticks should equal one minute", () => {
     expect(getTime(ticksPerMinute).minutes).toEqual(1);
 });
+
+test("26250 ticks should equal 10.5hours", () => {
+    expect(getTime(26250).hours).toEqual(10);
+    expect(getTime(26250).minutes).toEqual(30);
+});
 test.each([
     [2500, 1],
     [3500, 1],

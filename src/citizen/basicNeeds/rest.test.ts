@@ -1,5 +1,5 @@
-import { Citizen } from "../types";
-import { isExhausted, isRested, isTired, isVeryTired } from "./basicNeeds";
+import { Citizen } from "../../types";
+import { isExhausted, isRested, isTired, isVeryTired } from "./rest";
 
 const citizenWithRest = (rest: number): Citizen => ({
     id: "1",

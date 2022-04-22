@@ -33,14 +33,14 @@ const updateRestWhenAwake = (rest: number) =>
         when(isExhaustedAmount, substractPercentage(0.142)),
     );
 
-const updateRestWhenSleeping = (rest: number) =>
-    pipe(
-        rest,
-        when(isRestedAmount, substractPercentage(0.237)),
-        when(isTiredAmount, substractPercentage(0.166)),
-        when(isVeryTiredAmount, substractPercentage(0.071)),
-        when(isExhaustedAmount, substractPercentage(0.142)),
-    );
+// const updateRestWhenSleeping = (rest: number) =>
+//     pipe(
+//         rest,
+//         when(isRestedAmount, substractPercentage(0.237)),
+//         when(isTiredAmount, substractPercentage(0.166)),
+//         when(isVeryTiredAmount, substractPercentage(0.071)),
+//         when(isExhaustedAmount, substractPercentage(0.142)),
+//     );
 
 // const calculateRest = (currentRest: number) =>
 
