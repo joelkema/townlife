@@ -1,7 +1,7 @@
 import { and, pipe, when } from "../../logic";
 import { isNumber, isGreaterThanEquals, isLessThan } from "../../predicates";
 import { Citizen } from "../../types";
-import { ticksPerDay } from "../../utils/time";
+import { ticksPerInGameDay } from "../../utils/gameTime";
 
 const ticksInInterval = 150;
 
@@ -47,7 +47,7 @@ const updateRestWhenAwake = (rest: number) =>
 //     currentRest - 0.8 > 0 ? Math.round(currentRest - 0.8) : 0;
 
 // a character requires 10.5 hours (26,250 ticks) to full rest from 0% to 100%.
-const increaseRest = 100 * (ticksInInterval / ticksPerDay) * (24 / 10.5);
+const increaseRest = 100 * (ticksInInterval / ticksPerInGameDay) * (24 / 10.5);
 
 export const decreaseRest =
     (currentTicks: number, prevTicks: number) =>

@@ -5,12 +5,12 @@ import { AppState, Citizen } from "./types";
 
 import { and, not, when } from "./logic";
 import { pipe } from "./logic/pipe";
-import { ticksPerMinute, getTime, formatTime, ticksPerMilliseconds } from "./utils/time";
+import { getInGameTime, formatTime, millisecondsToTicks } from "./utils/gameTime";
 import { decreaseRest, isSleeping } from "./citizen/basicNeeds/rest";
 import { isHungry, decreaseSaturation } from "./citizen/basicNeeds";
 
 const oneSecond = 1000; // 1 second = 1000ms
-const interval = oneSecond / 4; // 250ms
+const interval = oneSecond / 4; // Simulation runs every 250ms. This results in 15 ticks per interval (1000 / 4 = 60 / 4)
 
 const eat = (citizen: Citizen): Citizen => ({
     ...citizen,
@@ -50,11 +50,11 @@ const log = (prop?: keyof Citizen) => (citizen: Citizen) => {
 
 const isSleepTime = (hour: number) => (_: Citizen) => hour < 8 || hour > 20;
 
-const automate =
+const simulate =
     (prev: number, current: number) =>
     (state: AppState): AppState => {
-        const prevTicks = ticksPerMilliseconds(prev * interval, 11);
-        const currentTicks = ticksPerMilliseconds(current * interval, 11);
+        const prevTicks = millisecondsToTicks(prev * interval, 1);
+        const currentTicks = millisecondsToTicks(current * interval, 1);
 
         console.log("==================");
         console.log(prev);
@@ -63,7 +63,7 @@ const automate =
         console.log(currentTicks);
         console.log(currentTicks - prevTicks);
 
-        const { minutes, hours, days } = getTime(currentTicks);
+        const { minutes, hours, days } = getInGameTime(currentTicks);
 
         const citizens = Object.keys(state.citizens).reduce((map: Record<string, Citizen>, id) => {
             const c = state.citizens[id];
@@ -121,12 +121,12 @@ const useTownLife = () => {
     useInterval(() => {
         currentTicks.current++;
 
-        const updatedState = automate(prevTicks.current, currentTicks.current)(data);
+        const updatedState = simulate(prevTicks.current, currentTicks.current)(data);
 
         prevTicks.current = currentTicks.current;
 
         setData(updatedState);
-    }, interval); // Simulation runs every 250ms,
+    }, interval);
 
     // useInterval(() => {
     //     console.log("A");
