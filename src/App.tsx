@@ -5,14 +5,20 @@ import { AppState, Citizen } from "./types";
 
 import { and, not, or, when } from "./logic";
 import { pipe } from "./logic/pipe";
-import { getInGameTime, formatTime, millisecondsToTicks } from "./utils/gameTime";
-import { decreaseRest, increaseRest, isSleeping, isTired } from "./citizen/basicNeeds/rest";
+import { getInGameTime, formatTime, tickToHours } from "./utils/gameTime";
+import {
+    decreaseRest,
+    increaseRest,
+    isSleeping,
+    isTired,
+    shouldChangeRest,
+} from "./citizen/basicNeeds/rest";
 import { isHungry, decreaseSaturation } from "./citizen/basicNeeds";
 
-const GAME_SPEED = 360;
+const TICKS_PER_SECOND = 320;
 
 const oneSecond = 1000; // 1 second = 1000ms
-const interval = oneSecond / 4; // Simulation runs every 250ms. This results in 15 ticks per interval (1000 / 4 = 60 / 4)
+const interval = oneSecond / TICKS_PER_SECOND; // Simulation runs every 250ms. This results in 15 ticks per interval (1000 / 4 = 60 / 4)
 
 const eat = (citizen: Citizen): Citizen => ({
     ...citizen,
@@ -49,18 +55,13 @@ const log = (prop?: keyof Citizen) => (citizen: Citizen) => {
 
 // const act = (hour: number, minutes: number) => {};
 
-const isSleepTime = (hour: number) => (_: Citizen) => hour < 8 || hour > 20;
+const isSleepTime = (tick: number) => (_: Citizen) =>
+    tickToHours(tick) < 8 || tickToHours(tick) > 20;
 
 const simulate =
-    (prev: number, current: number) =>
+    (tick: number) =>
     (state: AppState): AppState => {
-        // const prevTicks = millisecondsToTicks(prev * interval, 1);
-        // const currentTicks = millisecondsToTicks(current * interval, 1);
-
-        const prevTicks = prev * GAME_SPEED;
-        const currentTicks = current * GAME_SPEED;
-
-        const { minutes, hours, days } = getInGameTime(currentTicks);
+        const { minutes, hours, days } = getInGameTime(tick, TICKS_PER_SECOND);
 
         const citizens = Object.keys(state.citizens).reduce((map: Record<string, Citizen>, id) => {
             const c = state.citizens[id];
@@ -72,16 +73,27 @@ const simulate =
             //     console.log("sleeptime");
             // }
 
+            const whenSleeping = (hours: number) => (citizen: Citizen) =>
+                pipe(
+                    citizen,
+                    // sleep section
+                    when(shouldChangeRest(tick), increaseRest),
+                    when(not(isSleepTime(hours)), wakeUp),
+
+                    // decreaseSaturation,
+                );
+
             // const citizen = state.citizens[id];
             const citizen = pipe(
                 c,
-                // log("state"),
-                when(isSleeping, increaseRest(currentTicks)),
-                when(not(isSleeping), decreaseRest(currentTicks)),
+                // sleep section
+                when(and(isSleeping, shouldChangeRest(tick)), increaseRest),
+                when(and(not(isSleeping), shouldChangeRest(tick)), decreaseRest),
                 when(and(not(isSleepTime(hours)), isSleeping), wakeUp),
-                when(isHungry, eat),
                 when(or(isTired, isSleepTime(hours)), sleep),
-                decreaseSaturation,
+                when(isHungry, eat),
+
+                // decreaseSaturation,
             );
 
             map[id] = citizen;
@@ -95,10 +107,10 @@ const simulate =
 const aad: Citizen = {
     id: "1",
     name: "Aad",
-    state: "asleep",
+    state: "awake",
     basicNeeds: {
         food: 100,
-        rest: 100,
+        rest: 60,
     },
 };
 
@@ -120,12 +132,12 @@ const useTownLife = () => {
     });
 
     const prevTick = useRef<number>(0);
-    const currentTick = useRef<number>(0);
+    const currentTick = useRef<number>(2500 * 1);
 
     useInterval(() => {
         currentTick.current++;
 
-        const updatedState = simulate(prevTick.current, currentTick.current)(data);
+        const updatedState = simulate(currentTick.current)(data);
 
         prevTick.current = currentTick.current;
 
@@ -148,8 +160,8 @@ const App = () => {
         <>
             <p>day: {data.days}</p>
             <p>time: {formatTime(data.hours, data.minutes)}</p>
-            <p>interval: {ticks}</p>
-            <p>ticks: {ticks * GAME_SPEED}</p>
+            <p>TPS: {TICKS_PER_SECOND}</p>
+            <p>ticks: {ticks}</p>
             <table>
                 <tr>
                     <th>Name</th>
@@ -161,7 +173,7 @@ const App = () => {
                 <tr>
                     <td>{data.citizens[aad.id].name}</td>
                     <td>{data.citizens[aad.id].state}</td>
-                    <td>{data.citizens[aad.id].basicNeeds.food}</td>
+                    <td></td>
                     <td>{data.citizens[aad.id].basicNeeds.rest}</td>
                 </tr>
                 {/* <tr>

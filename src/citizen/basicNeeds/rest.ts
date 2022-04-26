@@ -27,43 +27,35 @@ const substractPercentage = (amount: number) => (p: number) =>
 
 const addPercentage = (amount: number) => (p: number) => round(p + amount > 100 ? 100 : p + amount);
 
-const updateRestWhenAwake = (rest: number, ticks: number) => {
-    if (ticks < ticksInInterval) return rest;
-
-    const times = (amount: number) => ticks;
-
-    return pipe(
+const updateRestWhenAwake = (rest: number) =>
+    pipe(
         rest,
         when(isRestedAmount, substractPercentage(0.237)),
         when(isTiredAmount, substractPercentage(0.166)),
         when(isVeryTiredAmount, substractPercentage(0.071)),
         when(isExhaustedAmount, substractPercentage(0.142)),
     );
-};
+
+// When awake, rest goes down every 150 ticks
+export const shouldChangeRest = (tick: number) => (_: Citizen) => tick % 150 === 0;
 
 // a character requires 10.5 hours (26,250 ticks) to full rest from 0% to 100%.
-const updateRestWhenSleeping = addPercentage(
-    100 * (ticksInInterval / ticksPerInGameDay) * (24 / 10.5),
-);
+const updateRestWhenSleeping = addPercentage(100 * (60 / ticksPerInGameDay) * (24 / 10.5));
 
-export const increaseRest =
-    (ticks: number) =>
-    (citizen: Citizen): Citizen => ({
+export const increaseRest = (citizen: Citizen): Citizen => ({
+    ...citizen,
+    basicNeeds: {
+        ...citizen.basicNeeds,
+        rest: updateRestWhenSleeping(citizen.basicNeeds.rest),
+    },
+});
+
+export const decreaseRest = (citizen: Citizen): Citizen => {
+    return {
         ...citizen,
         basicNeeds: {
             ...citizen.basicNeeds,
-            rest: updateRestWhenSleeping(citizen.basicNeeds.rest),
+            rest: updateRestWhenAwake(citizen.basicNeeds.rest),
         },
-    });
-
-export const decreaseRest =
-    (ticks: number) =>
-    (citizen: Citizen): Citizen => {
-        return {
-            ...citizen,
-            basicNeeds: {
-                ...citizen.basicNeeds,
-                rest: updateRestWhenAwake(citizen.basicNeeds.rest, ticks),
-            },
-        };
     };
+};

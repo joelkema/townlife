@@ -1,8 +1,4 @@
-import { getInGameTime, ticksPerInGameDay, ticksPerInGameMinute } from "./gameTime";
-
-test("42 ticks should equal one minute", () => {
-    expect(getInGameTime(ticksPerInGameMinute).minutes).toEqual(1);
-});
+import { getInGameTime, ticksPerInGameDay } from "./gameTime";
 
 test("26250 ticks should equal 10.5hours", () => {
     expect(getInGameTime(26250).hours).toEqual(10);
