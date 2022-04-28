@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import useInterval from "./hooks/useInterval";
 import { AppState, Citizen } from "./types";
@@ -14,6 +14,7 @@ import {
     shouldChangeRest,
 } from "./citizen/basicNeeds/rest";
 import { isHungry, decreaseSaturation } from "./citizen/basicNeeds";
+import useRequestAnimationFrame from "./hooks/useRequestAnimationFrame";
 
 const TICKS_PER_SECOND = 320;
 
@@ -134,15 +135,24 @@ const useTownLife = () => {
     const prevTick = useRef<number>(0);
     const currentTick = useRef<number>(2500 * 1);
 
-    useInterval(() => {
-        currentTick.current++;
+    useRequestAnimationFrame((timestamp) => {
+        if (prevTick.current === 0) {
+            var date = new Date(timestamp);
+            console.log(date.getTime());
+            console.log(date);
+            debugger;
+        }
+    });
 
-        const updatedState = simulate(currentTick.current)(data);
+    // useInterval(() => {
+    //     currentTick.current++;
 
-        prevTick.current = currentTick.current;
+    //     const updatedState = simulate(currentTick.current)(data);
 
-        setData(updatedState);
-    }, interval);
+    //     prevTick.current = currentTick.current;
+
+    //     setData(updatedState);
+    // }, interval);
 
     // useInterval(() => {
     //     console.log("A");
@@ -151,40 +161,90 @@ const useTownLife = () => {
     return { data, ticks: currentTick.current };
 };
 
-const App = () => {
-    const { data, ticks } = useTownLife();
+const update = (context: CanvasRenderingContext2D) => {};
 
-    // console.log(data.citizens["1"].basicNeeds.food);
+// Box width
+var bw = 270;
+// Box height
+var bh = 180;
+
+const draw = (context: CanvasRenderingContext2D) => {
+    context.lineWidth = 10;
+    context.strokeStyle = "rgb(2,7,159)";
+    for (var x = 0; x < bw; x += 90) {
+        for (var y = 0; y < bh; y += 90) {
+            context.strokeRect(x + 10, y + 10, 90, 90);
+        }
+    }
+};
+
+const gameLoop =
+    (context: CanvasRenderingContext2D, lastRender: number) => (timestamp: DOMHighResTimeStamp) => {
+        const elapsed = timestamp - lastRender;
+
+        var date = new Date(timestamp);
+        console.log(date.getTime());
+        console.log(date);
+
+        draw(context);
+
+        draw(context);
+
+        // Keep requesting new frames
+        window.requestAnimationFrame(gameLoop(context, lastRender));
+    };
+
+const init = () => {
+    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    const context = canvas.getContext("2d");
+
+    window.requestAnimationFrame(gameLoop(context!, 0));
+};
+
+const App = () => {
+    useEffect(() => {
+        init();
+    }, []);
 
     return (
         <>
-            <p>day: {data.days}</p>
-            <p>time: {formatTime(data.hours, data.minutes)}</p>
-            <p>TPS: {TICKS_PER_SECOND}</p>
-            <p>ticks: {ticks}</p>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>State</th>
-                    <th>Food</th>
-                    <th>Rest</th>
-                </tr>
-
-                <tr>
-                    <td>{data.citizens[aad.id].name}</td>
-                    <td>{data.citizens[aad.id].state}</td>
-                    <td></td>
-                    <td>{data.citizens[aad.id].basicNeeds.rest}</td>
-                </tr>
-                {/* <tr>
-                    <td>{data.citizens[jan.id].name}</td>
-                    <td>{data.citizens[jan.id].state}</td>
-                    <td>{data.citizens[jan.id].basicNeeds.food}</td>
-                    <td>{data.citizens[jan.id].basicNeeds.rest}</td>
-                </tr> */}
-            </table>
+            <canvas id="canvas" width="420px" height="420px"></canvas>
         </>
     );
+
+    // const { data, ticks } = useTownLife();
+
+    // // console.log(data.citizens["1"].basicNeeds.food);
+
+    // return (
+    //     <>
+    //         <p>day: {data.days}</p>
+    //         <p>time: {formatTime(data.hours, data.minutes)}</p>
+    //         <p>TPS: {TICKS_PER_SECOND}</p>
+    //         <p>ticks: {ticks}</p>
+    //         <table>
+    //             <tr>
+    //                 <th>Name</th>
+    //                 <th>State</th>
+    //                 <th>Food</th>
+    //                 <th>Rest</th>
+    //             </tr>
+
+    //             <tr>
+    //                 <td>{data.citizens[aad.id].name}</td>
+    //                 <td>{data.citizens[aad.id].state}</td>
+    //                 <td></td>
+    //                 <td>{data.citizens[aad.id].basicNeeds.rest}</td>
+    //             </tr>
+    //             {/* <tr>
+    //                 <td>{data.citizens[jan.id].name}</td>
+    //                 <td>{data.citizens[jan.id].state}</td>
+    //                 <td>{data.citizens[jan.id].basicNeeds.food}</td>
+    //                 <td>{data.citizens[jan.id].basicNeeds.rest}</td>
+    //             </tr> */}
+    //         </table>
+    //     </>
+    // );
 };
 
 export default App;
