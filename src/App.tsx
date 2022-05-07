@@ -59,7 +59,7 @@ const log = (prop?: keyof Citizen) => (citizen: Citizen) => {
 const isSleepTime = (tick: number) => (_: Citizen) =>
     tickToHours(tick) < 8 || tickToHours(tick) > 20;
 
-const simulate =
+const gameLoop =
     (tick: number) =>
     (state: AppState): AppState => {
         const { minutes, hours, days } = getInGameTime(tick, TICKS_PER_SECOND);
@@ -90,11 +90,12 @@ const simulate =
                 // sleep section
                 when(and(isSleeping, shouldChangeRest(tick)), increaseRest),
                 when(and(not(isSleeping), shouldChangeRest(tick)), decreaseRest),
-                when(and(not(isSleepTime(hours)), isSleeping), wakeUp),
-                when(or(isTired, isSleepTime(hours)), sleep),
-                when(isHungry, eat),
+                when(and(not(isSleepTime(tick)), isSleeping), wakeUp),
+                when(or(isTired, isSleepTime(tick)), sleep),
 
-                // decreaseSaturation,
+                // eat section
+                when(isHungry, eat),
+                decreaseSaturation,
             );
 
             map[id] = citizen;
@@ -135,24 +136,24 @@ const useTownLife = () => {
     const prevTick = useRef<number>(0);
     const currentTick = useRef<number>(2500 * 1);
 
-    useRequestAnimationFrame((timestamp) => {
-        if (prevTick.current === 0) {
-            var date = new Date(timestamp);
-            console.log(date.getTime());
-            console.log(date);
-            debugger;
-        }
-    });
+    // useRequestAnimationFrame((timestamp) => {
+    //     if (prevTick.current === 0) {
+    //         var date = new Date(timestamp);
+    //         console.log(date.getTime());
+    //         console.log(date);
+    //         debugger;
+    //     }
+    // });
 
-    // useInterval(() => {
-    //     currentTick.current++;
+    useInterval(() => {
+        currentTick.current++;
 
-    //     const updatedState = simulate(currentTick.current)(data);
+        const updatedState = gameLoop(currentTick.current)(data);
 
-    //     prevTick.current = currentTick.current;
+        prevTick.current = currentTick.current;
 
-    //     setData(updatedState);
-    // }, interval);
+        setData(updatedState);
+    }, interval);
 
     // useInterval(() => {
     //     console.log("A");
@@ -178,73 +179,71 @@ const draw = (context: CanvasRenderingContext2D) => {
     }
 };
 
-const gameLoop =
-    (context: CanvasRenderingContext2D, lastRender: number) => (timestamp: DOMHighResTimeStamp) => {
-        const elapsed = timestamp - lastRender;
+// const gameLoop =
+//     (context: CanvasRenderingContext2D, lastRender: number) => (timestamp: DOMHighResTimeStamp) => {
+//         const elapsed = timestamp - lastRender;
 
-        var date = new Date(timestamp);
-        console.log(date.getTime());
-        console.log(date);
+//         var date = new Date(timestamp);
+//         console.log(date.getTime());
+//         console.log(date);
 
-        draw(context);
+//         draw(context);
 
-        draw(context);
+//         draw(context);
 
-        // Keep requesting new frames
-        window.requestAnimationFrame(gameLoop(context, lastRender));
-    };
+//         // Keep requesting new frames
+//         window.requestAnimationFrame(gameLoop(context, lastRender));
+//     };
 
-const init = () => {
-    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    const context = canvas.getContext("2d");
+// const init = () => {
+//     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+//     const context = canvas.getContext("2d");
 
-    window.requestAnimationFrame(gameLoop(context!, 0));
-};
+//     window.requestAnimationFrame(gameLoop(context!, 0));
+// };
 
 const App = () => {
-    useEffect(() => {
-        init();
-    }, []);
-
-    return (
-        <>
-            <canvas id="canvas" width="420px" height="420px"></canvas>
-        </>
-    );
-
-    // const { data, ticks } = useTownLife();
-
-    // // console.log(data.citizens["1"].basicNeeds.food);
+    // useEffect(() => {
+    //     init();
+    // }, []);
 
     // return (
     //     <>
-    //         <p>day: {data.days}</p>
-    //         <p>time: {formatTime(data.hours, data.minutes)}</p>
-    //         <p>TPS: {TICKS_PER_SECOND}</p>
-    //         <p>ticks: {ticks}</p>
-    //         <table>
-    //             <tr>
-    //                 <th>Name</th>
-    //                 <th>State</th>
-    //                 <th>Food</th>
-    //                 <th>Rest</th>
-    //             </tr>
-
-    //             <tr>
-    //                 <td>{data.citizens[aad.id].name}</td>
-    //                 <td>{data.citizens[aad.id].state}</td>
-    //                 <td></td>
-    //                 <td>{data.citizens[aad.id].basicNeeds.rest}</td>
-    //             </tr>
-    //             {/* <tr>
-    //                 <td>{data.citizens[jan.id].name}</td>
-    //                 <td>{data.citizens[jan.id].state}</td>
-    //                 <td>{data.citizens[jan.id].basicNeeds.food}</td>
-    //                 <td>{data.citizens[jan.id].basicNeeds.rest}</td>
-    //             </tr> */}
-    //         </table>
+    //         <canvas id="canvas" width="420px" height="420px"></canvas>
     //     </>
     // );
+
+    const { data, ticks } = useTownLife();
+
+    return (
+        <>
+            <p>day: {data.days}</p>
+            <p>time: {formatTime(data.hours, data.minutes)}</p>
+            <p>TPS: {TICKS_PER_SECOND}</p>
+            <p>ticks: {ticks}</p>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>State</th>
+                    <th>Food</th>
+                    <th>Rest</th>
+                </tr>
+
+                <tr>
+                    <td>{data.citizens[aad.id].name}</td>
+                    <td>{data.citizens[aad.id].state}</td>
+                    <td>{data.citizens[aad.id].basicNeeds.food}</td>
+                    <td>{data.citizens[aad.id].basicNeeds.rest}</td>
+                </tr>
+                {/* <tr>
+                    <td>{data.citizens[jan.id].name}</td>
+                    <td>{data.citizens[jan.id].state}</td>
+                    <td>{data.citizens[jan.id].basicNeeds.food}</td>
+                    <td>{data.citizens[jan.id].basicNeeds.rest}</td>
+                </tr> */}
+            </table>
+        </>
+    );
 };
 
 export default App;
