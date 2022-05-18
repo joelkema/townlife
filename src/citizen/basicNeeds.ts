@@ -7,7 +7,7 @@ export const isHungry = ({ basicNeeds: { food } }: Citizen) => food > 12.5 && fo
 export const isUrgentlyHungry = ({ basicNeeds: { food } }: Citizen) => food >= 1 && food < 12.5;
 export const isStarving = ({ basicNeeds: { food } }: Citizen) => food < 1;
 
-const calculateSaturation = (f: number) => substractPercentage(0.002668)(f);
+const calculateSaturation = substractPercentage(0.002668);
 
 export const decreaseSaturation = (citizen: Citizen): Citizen => ({
     ...citizen,

@@ -37,7 +37,7 @@ const updateRestWhenAwake = (rest: number) =>
     );
 
 // When awake, rest goes down every 150 ticks
-export const shouldChangeRest = (tick: number) => (_: Citizen) => tick % 150 === 0;
+export const shouldChangeRest = (tick: number) => (_: Citizen) => tick % ticksInInterval === 0;
 
 // a character requires 10.5 hours (26,250 ticks) to full rest from 0% to 100%.
 const updateRestWhenSleeping = addPercentage(100 * (60 / ticksPerInGameDay) * (24 / 10.5));

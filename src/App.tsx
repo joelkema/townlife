@@ -16,10 +16,10 @@ import {
 import { isHungry, decreaseSaturation } from "./citizen/basicNeeds";
 import useRequestAnimationFrame from "./hooks/useRequestAnimationFrame";
 
-const TICKS_PER_SECOND = 320;
+const TICKS_PER_SECOND = 60;
 
 const oneSecond = 1000; // 1 second = 1000ms
-const interval = oneSecond / TICKS_PER_SECOND; // Simulation runs every 250ms. This results in 15 ticks per interval (1000 / 4 = 60 / 4)
+const interval = oneSecond / TICKS_PER_SECOND; // 16.6 ms per tick
 
 const eat = (citizen: Citizen): Citizen => ({
     ...citizen,
@@ -35,10 +35,6 @@ const wakeUp = (citizen: Citizen): Citizen => ({
     ...citizen,
     state: "awake",
 });
-
-// 0
-// 360 --- 150 | 300
-// 720
 
 const timetable: Record<number, string> = {
     0: "sleep",
@@ -134,7 +130,7 @@ const useTownLife = () => {
     });
 
     const prevTick = useRef<number>(0);
-    const currentTick = useRef<number>(2500 * 1);
+    const currentTick = useRef<number>(0);
 
     // useRequestAnimationFrame((timestamp) => {
     //     if (prevTick.current === 0) {
