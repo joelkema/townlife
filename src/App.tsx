@@ -58,7 +58,7 @@ const isSleepTime = (tick: number) => (_: Citizen) =>
 const gameLoop =
     (tick: number) =>
     (state: AppState): AppState => {
-        const { minutes, hours, days } = getInGameTime(tick, TICKS_PER_SECOND);
+        const { minutes, hours, days } = getInGameTime(tick);
 
         const citizens = Object.keys(state.citizens).reduce((map: Record<string, Citizen>, id) => {
             const c = state.citizens[id];
@@ -116,13 +116,17 @@ const jan = {
     ...aad,
     id: "2",
     name: "Jan",
+    basicNeeds: {
+        food: 59,
+        rest: 30,
+    },
 };
 
 const useTownLife = () => {
     const [data, setData] = useState<AppState>({
         citizens: {
             [aad.id]: aad,
-            // [jan.id]: jan,
+            [jan.id]: jan,
         },
         days: 0,
         hours: 0,
@@ -224,13 +228,19 @@ const App = () => {
                     <th>Food</th>
                     <th>Rest</th>
                 </tr>
+                {Object.keys(data.citizens).map((id) => {
+                    const { name, state, basicNeeds } = data.citizens[id];
 
-                <tr>
-                    <td>{data.citizens[aad.id].name}</td>
-                    <td>{data.citizens[aad.id].state}</td>
-                    <td>{data.citizens[aad.id].basicNeeds.food}</td>
-                    <td>{data.citizens[aad.id].basicNeeds.rest}</td>
-                </tr>
+                    return (
+                        <tr>
+                            <td>{name}</td>
+                            <td>{state}</td>
+                            <td>{basicNeeds.food}</td>
+                            <td>{basicNeeds.rest}</td>
+                        </tr>
+                    );
+                })}
+
                 {/* <tr>
                     <td>{data.citizens[jan.id].name}</td>
                     <td>{data.citizens[jan.id].state}</td>

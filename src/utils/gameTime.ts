@@ -4,7 +4,7 @@
 export const ticksPerInGameDay = 60000;
 export const ticksPerInGameHour = ticksPerInGameDay / 24; //2500
 
-export const getInGameTime = (tick: number, ticksPerSecond: number = 60) => {
+export const getInGameTime = (tick: number) => {
     const ticksPerInGameMinute = ticksPerInGameHour / 60;
     const totalMinutes = Math.floor(tick / ticksPerInGameMinute);
     const totalHours = Math.floor(tick / ticksPerInGameHour);

@@ -2,7 +2,7 @@ import { and, pipe, when } from "../../logic";
 import { isNumber, isGreaterThanEquals, isLessThan } from "../../predicates";
 import { Citizen } from "../../types";
 import { ticksPerInGameDay } from "../../utils/gameTime";
-import { round } from "../../utils/number";
+// import { round } from "../../utils/number";
 
 const ticksInInterval = 150;
 
@@ -22,10 +22,9 @@ export const isExhausted = checkIfRested(isExhaustedAmount);
 export const isAwake = ({ state }: Citizen) => state === "awake";
 export const isSleeping = ({ state }: Citizen) => state === "asleep";
 
-const substractPercentage = (amount: number) => (p: number) =>
-    round(p - amount < 0 ? 0 : p - amount);
+const substractPercentage = (amount: number) => (p: number) => p - amount < 0 ? 0 : p - amount;
 
-const addPercentage = (amount: number) => (p: number) => round(p + amount > 100 ? 100 : p + amount);
+const addPercentage = (amount: number) => (p: number) => p + amount > 100 ? 100 : p + amount;
 
 const updateRestWhenAwake = (rest: number) =>
     pipe(
