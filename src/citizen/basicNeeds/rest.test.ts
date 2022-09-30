@@ -18,7 +18,7 @@ test.each([
 
 test.each([
     [true, 14],
-    [true, 28],
+    [true, 27],
     [true, 25],
     [false, 1],
     [false, 100],

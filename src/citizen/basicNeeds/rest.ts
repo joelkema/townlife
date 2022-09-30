@@ -2,9 +2,9 @@ import { and, pipe, when } from "../../logic";
 import { isNumber, isGreaterThanEquals, isLessThan } from "../../predicates";
 import { Citizen } from "../../types";
 import { ticksPerInGameDay } from "../../utils/gameTime";
-// import { round } from "../../utils/number";
+import { substractPercentage, addPercentage } from "../../utils/number";
 
-const ticksInInterval = 150;
+const checkRestTicks = 150;
 
 const checkIfRested = (pred: (n: number) => boolean) => (citizen: Citizen) =>
     pred(citizen.basicNeeds.rest);
@@ -22,10 +22,6 @@ export const isExhausted = checkIfRested(isExhaustedAmount);
 export const isAwake = ({ state }: Citizen) => state === "awake";
 export const isSleeping = ({ state }: Citizen) => state === "asleep";
 
-const substractPercentage = (amount: number) => (p: number) => p - amount < 0 ? 0 : p - amount;
-
-const addPercentage = (amount: number) => (p: number) => p + amount > 100 ? 100 : p + amount;
-
 const updateRestWhenAwake = (rest: number) =>
     pipe(
         rest,
@@ -36,7 +32,7 @@ const updateRestWhenAwake = (rest: number) =>
     );
 
 // When awake, rest goes down every 150 ticks
-export const shouldChangeRest = (tick: number) => (_: Citizen) => tick % ticksInInterval === 0;
+export const shouldChangeRest = (tick: number) => (_: Citizen) => tick % checkRestTicks === 0;
 
 // a character requires 10.5 hours (26,250 ticks) to full rest from 0% to 100%.
 const updateRestWhenSleeping = addPercentage(100 * (60 / ticksPerInGameDay) * (24 / 10.5));
@@ -49,12 +45,10 @@ export const increaseRest = (citizen: Citizen): Citizen => ({
     },
 });
 
-export const decreaseRest = (citizen: Citizen): Citizen => {
-    return {
-        ...citizen,
-        basicNeeds: {
-            ...citizen.basicNeeds,
-            rest: updateRestWhenAwake(citizen.basicNeeds.rest),
-        },
-    };
-};
+export const decreaseRest = (citizen: Citizen): Citizen => ({
+    ...citizen,
+    basicNeeds: {
+        ...citizen.basicNeeds,
+        rest: updateRestWhenAwake(citizen.basicNeeds.rest),
+    },
+});

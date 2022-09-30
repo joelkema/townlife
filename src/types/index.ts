@@ -1,4 +1,5 @@
 export type AppState = {
+    grid: number[][];
     citizens: Record<string, Citizen>;
     days: number;
     hours: number;

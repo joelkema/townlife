@@ -7,7 +7,9 @@ test("26250 ticks should equal 10.5hours", () => {
 test.each([
     [2500, 1],
     [3500, 1],
+    [4999, 1],
     [5000, 2],
+    [5001, 2],
     [62500, 1],
 ])("%i ticks should equal %i hour", (ticks, expected) => {
     expect(getInGameTime(ticks).hours).toEqual(expected);
