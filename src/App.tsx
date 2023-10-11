@@ -9,7 +9,7 @@ const aad: Citizen = {
     name: "Aad",
     state: "awake",
     basicNeeds: {
-        food: 100,
+        hunger: 0,
         rest: 60,
     },
 };
@@ -19,7 +19,7 @@ const jan = {
     id: "2",
     name: "Jan",
     basicNeeds: {
-        food: 59,
+        hunger: 0,
         rest: 30,
     },
 };
@@ -53,15 +53,15 @@ const App = () => {
                 <tr>
                     <th>Name</th>
                     <th>State</th>
-                    <th style={{ width: 300 }}>Food</th>
+                    <th style={{ width: 300 }}>Hunger</th>
                     <th>Rest</th>
                 </tr>
-                {Object.values(data.citizens).map(({ name, state, basicNeeds: { food, rest } }) => {
+                {Object.values(data.citizens).map(({ name, state, basicNeeds: { hunger, rest } }) => {
                     return (
                         <tr>
                             <td>{name}</td>
                             <td>{state}</td>
-                            <td>{food}</td>
+                            <td>{hunger}</td>
                             <td>{rest}</td>
                         </tr>
                     );

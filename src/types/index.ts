@@ -43,6 +43,6 @@ type Profession = "foresting" | "mining" | "laboror";
 // Tailor(Profession);
 
 type BasicNeeds = {
-    food: number; // saturation
+    hunger: number; // saturation
     rest: number;
 };

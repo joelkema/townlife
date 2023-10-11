@@ -1,4 +1,4 @@
-import { isHungry, decreaseSaturation } from "./citizen/basicNeeds";
+import {  increaseHunger, isHungry } from "./citizen/basicNeeds";
 import {
     shouldChangeRest,
     increaseRest,
@@ -12,7 +12,7 @@ import { tickToHours, getInGameTime } from "./utils/gameTime";
 
 const eat = (citizen: Citizen): Citizen => ({
     ...citizen,
-    basicNeeds: { ...citizen.basicNeeds, food: 100 },
+    basicNeeds: { ...citizen.basicNeeds, hunger: citizen.basicNeeds.hunger - 50000 },
 });
 
 const sleep = (citizen: Citizen): Citizen => ({
@@ -76,12 +76,13 @@ const townlife = (state: AppState) => {
                 // not sleeping
                 when(and(not(isSleeping), shouldChangeRest(tick)), decreaseRest),
 
-                when(and(not(isSleepTime(tick)), isSleeping), wakeUp),
-                when(or(isTired, isSleepTime(tick)), sleep),
+                // when(and(not(isSleepTime(tick)), isSleeping), wakeUp),
+                when(not(isTired), wakeUp),
+                when(isTired, sleep),
 
                 // eat section
                 when(isHungry, eat),
-                decreaseSaturation,
+                increaseHunger,
             );
 
             map[id] = citizen;
