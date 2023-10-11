@@ -24,6 +24,12 @@ const jan = {
     },
 };
 
+const agents = [
+    {
+        role: "citizen",
+    },
+];
+
 const initialState: AppState = {
     citizens: {
         [aad.id]: aad,

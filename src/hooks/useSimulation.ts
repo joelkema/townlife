@@ -3,7 +3,7 @@ import townlife from "../townlife";
 import { AppState } from "../types";
 import useInterval from "./useInterval";
 
-const TICKS_PER_SECOND = 60;
+const TICKS_PER_SECOND = 60; // 60fps
 
 const oneSecond = 1000; // 1 second = 1000ms
 const getInterval = (gameSpeed = 1) => oneSecond / (TICKS_PER_SECOND * gameSpeed); // 16.6 ms per tick
