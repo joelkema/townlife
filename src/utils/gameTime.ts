@@ -1,7 +1,19 @@
-// These times are based of: https://rimworldwiki.com/wiki/Time
+
+
+const settings = { 
+    rimworld: {
+        // These times are based of: https://rimworldwiki.com/wiki/Time
+        ticksPerInGameDay: 60000,
+    },
+    dwarfFortress: {
+        // https://dwarffortresswiki.org/index.php/DF2014:Time
+        ticksPerInGameDay: 1200,
+    }
+}
+
 
 // real time
-export const ticksPerInGameDay = 60000;
+export const ticksPerInGameDay = settings.dwarfFortress.ticksPerInGameDay; 
 export const ticksPerInGameHour = ticksPerInGameDay / 24; //2500
 
 export const getInGameTime = (tick: number) => {
