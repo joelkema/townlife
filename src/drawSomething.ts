@@ -1,9 +1,12 @@
-import { getInGameTime } from "./utils/gameTime";
+import { initialState } from './App';
+import townlife from './townlife';
+import { AppState } from './types';
+import { getInGameTime } from './utils/gameTime';
 
 const update = (deltaTime: number) => {
-  // Update your game here
-  console.log('update', deltaTime);
-}
+    // Update your game here
+    console.log('update', deltaTime);
+};
 
 const render = (ctx: CanvasRenderingContext2D, fps: number) => {
     // Render your game here
@@ -11,88 +14,79 @@ const render = (ctx: CanvasRenderingContext2D, fps: number) => {
 
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, 200, 100);
-    ctx.font = '16px Arial';	
+    ctx.font = '16px Arial';
     ctx.fillStyle = 'black';
     ctx.fillText(`FPS: ${fps}`, 10, 30);
-}
-
+};
 
 const tickRate = 1.0 / 60.0; // 60fps
 
 const fpsLimit = 30;
 
-type Timing = {
-  deltaTime: number;
-  previousTime: number;
-  fps: number;
-  secondsPassed: number;
-}
+const loop =
+    (ctx: CanvasRenderingContext2D, state: AppState): FrameRequestCallback =>
+    (timeInMs) => {
+        // Compute the delta-time against the previous time
+        const deltaTime = timeInMs - state.timing.previousTime;
+        const secondsPassed = Math.floor(timeInMs / 1000);
 
-type InGameTime = {
-  days: number;
-  months: number;
-}
+        // const previousSeconds = Math.floor(timing.previousTime / 1000);
+        // const seconds = Math.floor(time / 1000);
 
+        const fps = Math.round(1 / secondsPassed);
 
-const convertToInGameTime = (milliseconds: number): InGameTime => {
-  const ticksPerDay = 1200;
-  const ticksPerSecond = 100;
-  const ticksPerMonth = ticksPerDay * 30;
+        // const secondsPassed = deltaTime / 1000;
 
-  const totalSeconds = milliseconds / 1000;
-  const totalTicks = totalSeconds * ticksPerSecond;
+        const { days, months, hours, minutes } = getInGameTime(
+            secondsPassed * 100
+        );
 
-  const days = Math.floor(totalTicks / ticksPerDay);
-  const months = Math.floor(totalTicks / ticksPerMonth);
+        console.log('seconds', secondsPassed);
+        console.log(
+            `In-game time: ${months} months, ${days} days, ${hours} hours, ${minutes} minutes`
+        );
 
-  return { days, months };
-};
+        // const { minutes, hours, days } = getInGameTime(ticks);
 
-const loop = (ctx: CanvasRenderingContext2D, timing: Timing): FrameRequestCallback => (time) => {
-   // Compute the delta-time against the previous time
-  const deltaTime = time - timing.previousTime;
-  const secondsPassed =  Math.floor(time / 1000);
+        // 12 seconds = 1 in-game day
+        const inGameTicks = secondsPassed * 100;
 
-  // const previousSeconds = Math.floor(timing.previousTime / 1000);
-  // const seconds = Math.floor(time / 1000);
+        console.log('inGameTicks', inGameTicks);
 
-  // const fps = Math.round(1 / seconds);
+        const bloep = townlife(state).tick(inGameTicks);
 
-  // const secondsPassed = deltaTime / 1000;
+        console.log('bloep', bloep);
+        // console.log('time', time);
 
-  const { days, months } = convertToInGameTime(time);
+        //   console.log(minutes, hours, days);
 
+        // update();
 
-  console.log('seconds', secondsPassed);
-  console.log(`In-game time: ${months} months, ${days} days`);
+        // Update your game
+        // if (delta > tickRate) {
+        //   update(tickRate);
 
+        //   delta = delta - tickRate;
+        // }
 
-  // const { minutes, hours, days } = getInGameTime(ticks);
+        // Render your game
+        render(ctx, fps);
 
-  console.log('options', timing);  
- 
-
-// console.log('time', time);
-
-//   console.log(minutes, hours, days);
-
-  // update();
-
-
-  // Update your game
-  // if (delta > tickRate) {
-  //   update(tickRate);
-
-  //   delta = delta - tickRate;
-  // }
-
-  // Render your game
-  render(ctx, 0);
-
-  // Repeat
-  window.requestAnimationFrame(loop(ctx, { deltaTime, previousTime: time, fps: 0, secondsPassed }));
-}
-
+        // Repeat
+        window.requestAnimationFrame(
+            loop(ctx, {
+                ...state,
+                days,
+                months,
+                timing: {
+                    deltaTime,
+                    previousTime: timeInMs,
+                    fps: 0,
+                    secondsPassed,
+                },
+            })
+        );
+    };
 
 // const config = {
 // 	win: {
@@ -115,10 +109,6 @@ const loop = (ctx: CanvasRenderingContext2D, timing: Timing): FrameRequestCallba
 // };
 
 export const startGame = (ctx: CanvasRenderingContext2D) => {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 0, 100, 100);
-
     // Launch the game loop
-    window.requestAnimationFrame(loop(ctx, { deltaTime: 0, previousTime: 0, fps: 0, timePassed: 0 }));
-
-}
+    window.requestAnimationFrame(loop(ctx, initialState));
+};

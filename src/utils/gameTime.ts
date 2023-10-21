@@ -1,6 +1,4 @@
-
-
-const settings = { 
+const settings = {
     rimworld: {
         // These times are based of: https://rimworldwiki.com/wiki/Time
         ticksPerInGameDay: 60000,
@@ -8,12 +6,11 @@ const settings = {
     dwarfFortress: {
         // https://dwarffortresswiki.org/index.php/DF2014:Time
         ticksPerInGameDay: 1200,
-    }
-}
-
+    },
+};
 
 // real time
-export const ticksPerInGameDay = settings.dwarfFortress.ticksPerInGameDay; 
+export const ticksPerInGameDay = settings.dwarfFortress.ticksPerInGameDay;
 export const ticksPerInGameHour = ticksPerInGameDay / 24; //2500 if 60000 ticks per day
 
 /**
@@ -29,8 +26,9 @@ export const getInGameTime = (ticks: number) => {
     const minutes = totalMinutes % 60;
     const hours = tickToHours(ticks);
     const days = Math.floor(totalHours / 24);
+    const months = Math.floor(days / 30);
 
-    return { minutes, hours, days };
+    return { minutes, hours, days, months };
 };
 
 /**
@@ -38,7 +36,8 @@ export const getInGameTime = (ticks: number) => {
  * @param {number} ticks - The number of ticks to convert.
  * @returns {number} - The number of in-game days.
  */
-export const tickToHours = (tick: number) => Math.floor(tick / ticksPerInGameHour) % 24;
+export const tickToHours = (tick: number) =>
+    Math.floor(tick / ticksPerInGameHour) % 24;
 
 const formatNr = (nr: number) => (nr < 10 ? `0${nr}` : nr);
 
