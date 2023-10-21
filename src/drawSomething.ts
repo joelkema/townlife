@@ -8,15 +8,45 @@ const update = (deltaTime: number) => {
     console.log('update', deltaTime);
 };
 
+// Box width
+const bw = 400;
+// Box height
+const bh = 400;
+// Padding
+const p = 10;
+
+// draw a 20x20 grid
+const drawGrid = (ctx: CanvasRenderingContext2D) => {
+    const gridCellSize = 40;
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+    const x = 0;
+    const y = 0;
+
+    for (let lx = x; lx <= x + width; lx += gridCellSize) {
+        ctx.moveTo(lx, y);
+        ctx.lineTo(lx, y + height);
+    }
+
+    for (let ly = y; ly <= y + height; ly += gridCellSize) {
+        ctx.moveTo(x, ly);
+        ctx.lineTo(x + width, ly);
+    }
+    ctx.strokeStyle = 'black';
+    ctx.stroke();
+};
+
 const render = (ctx: CanvasRenderingContext2D, fps: number) => {
     // Render your game here
     console.log('render', ctx);
 
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 200, 100);
-    ctx.font = '16px Arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText(`FPS: ${fps}`, 10, 30);
+    // ctx.fillStyle = 'white';
+    // ctx.fillRect(0, 0, 200, 100);
+    // ctx.font = '16px Arial';
+    // ctx.fillStyle = 'black';
+    // ctx.fillText(`FPS: ${fps}`, 10, 30);
+
+    drawGrid(ctx);
 };
 
 const tickRate = 1.0 / 60.0; // 60fps
@@ -109,6 +139,9 @@ const loop =
 // };
 
 export const startGame = (ctx: CanvasRenderingContext2D) => {
+    ctx.canvas.width = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
+
     // Launch the game loop
     window.requestAnimationFrame(loop(ctx, initialState));
 };
