@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+#home {
+  width: 00px;
+  height: 400px;
+  background: url(/src/assets/home_1.png);
+  background-repeat: no-repeat;
+  background-size:cover
+}

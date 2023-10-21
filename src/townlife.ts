@@ -68,6 +68,7 @@ const townlife = (state: AppState) => {
                     // decreaseSaturation,
                 );
 
+
             // const citizen = state.citizens[id];
             const citizen = pipe(
                 c,
@@ -82,7 +83,10 @@ const townlife = (state: AppState) => {
 
                 // eat section
                 when(isHungry, eat),
-                increaseHunger,
+                increaseHunger, 
+                // increaseSleep 
+
+
             );
 
             map[id] = citizen;

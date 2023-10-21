@@ -38,7 +38,10 @@ const initialState: AppState = {
     days: 0,
     hours: 0,
     minutes: 0,
-    grid: [],
+    grid: [
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 1, 0],
+    ],
 };
 
 const App = () => {
@@ -74,6 +77,9 @@ const App = () => {
                     <td>{data.citizens[jan.id].basicNeeds.rest}</td>
                 </tr> */}
             </table>
+            <div id="home">
+                a
+            </div>
         </>
     );
 };
